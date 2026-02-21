@@ -48,12 +48,19 @@ void Game::update() {
             if (cityTitleTimer > 0) {
                 cityTitleTimer -= GetFrameTime();
             }
+            if (IsKeyPressed(KEY_MINUS)) {
+                health -= 10;
+                if (health < 0) health = 0;
+                if (health <= 0) currentState = GAMEOVER;
+            }
             if (IsKeyPressed(KEY_G)) currentState = GAMEOVER;
             break;
         }
         case GAMEOVER:
             if (IsKeyPressed(KEY_R)) {
-                health = 0;
+                health = 100;
+                cityTitleTimer = 5.0f;
+                player.setPosition({ 400.0f, 300.0f});
                 currentState = TITLE;
             }
             break;
@@ -86,16 +93,20 @@ void Game::draw() {
             DrawText("Echo Rift", screenWidth/2 - MeasureText("Echo Rift", 40)/2, screenHeight/2 - 100, 40, GOLD);
             break;
         }
-        case GAMEPLAY:
+        case GAMEPLAY: {
             BeginMode2D(camera);
             DrawRectangleRec(treeCollider, GREEN);
             player.draw();
             EndMode2D();
+            DrawRectangle(20, 20, 200, 25, DARKGRAY);
+            float healthBarWidth = (health / 100.0f)* 200.0f;
+            DrawRectangle(20, 20, (int)healthBarWidth, 25, RED);
             if (cityTitleTimer > 0) {
                 int textWidth = MeasureText("Echo City", 30);
                 DrawText("Echo City", (screenWidth / 2) - (textWidth / 2), 100, 30, VIOLET);
             }
             break;
+        }
         case GAMEOVER:
             DrawText("Game Over", 300, 250, 40, RED);
             DrawText("Drücke R um den letzeten Speicherpunkt zu laden", 280, 320, 20, GRAY);
