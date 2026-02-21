@@ -19,6 +19,10 @@ public:
         return position;
     }
 
+    void setPosition(Vector2 newPos) {
+        position = newPos;
+    }
+
 };
 
 #endif //ECHORIFT_PLAYER_H

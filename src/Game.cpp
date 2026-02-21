@@ -37,14 +37,20 @@ void Game::update() {
             if (IsKeyPressed(KEY_ENTER)) currentState = GAMEPLAY;
             break;
         }
-        case GAMEPLAY:
+        case GAMEPLAY: {
+            Vector2 oldPos = player.getPosition();
             player.update(GetFrameTime());
+            Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40};
+            if (CheckCollisionRecs(playerRect, treeCollider)) {
+                player.setPosition(oldPos);
+            }
             camera.target = player.getPosition();
             if (cityTitleTimer > 0) {
                 cityTitleTimer -= GetFrameTime();
             }
             if (IsKeyPressed(KEY_G)) currentState = GAMEOVER;
             break;
+        }
         case GAMEOVER:
             if (IsKeyPressed(KEY_R)) {
                 health = 0;
@@ -82,7 +88,7 @@ void Game::draw() {
         }
         case GAMEPLAY:
             BeginMode2D(camera);
-            DrawRectangle(100, 100, 50, 50, GREEN);
+            DrawRectangleRec(treeCollider, GREEN);
             player.draw();
             EndMode2D();
             if (cityTitleTimer > 0) {

@@ -28,6 +28,7 @@ private:
 
     float cityTitleTimer = 5.0f;
     int health;
+    Rectangle treeCollider = { 100.0f, 100.0f, 50.0f, 50.0f};
     Player player;
     Camera2D camera;
     GameState currentState;
