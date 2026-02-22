@@ -174,6 +174,10 @@ void Game::draw() const {
             }
             player.draw();
             EndMode2D();
+            DrawRectangle(10, 10, 250, 80, Fade(BLACK, 0.6f));
+            DrawText(TextFormat("Raum: [%d, %d]", roomX, roomY), 20, 20, 20, WHITE);
+            DrawText(TextFormat("Player X: %.0f Y: %.0f", player.getPosition().x, player.getPosition().y), 20, 45, 20, GREEN);
+            DrawText(TextFormat("Mouse World: %.0f %.0f", GetScreenToWorld2D(GetMousePosition(), camera).x, GetScreenToWorld2D(GetMousePosition(), camera).y), 20, 70, 20, YELLOW);
 
             DrawRectangle(20, 20, 200, 25, DARKGRAY);
             DrawRectangle(20, 20, (int)((health / 100.0f) * 200.0f), 25, RED);
