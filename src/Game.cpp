@@ -5,6 +5,7 @@
 Game::Game() : player({ 400.0f, 300.0f}, 300.0f) {
     InitWindow(screenWidth, screenHeight, "Echo Rift");
     SetTargetFPS(60);
+    initCityLevel();
     camera.target = { 400.0f, 300.0f};
     camera.offset = { screenWidth / 2.0f, screenHeight / 2.0f };
     camera.rotation = 0.0f;
@@ -24,10 +25,17 @@ void Game::run() {
     }
 }
 
+//reset
 void Game::resetGame() {
     health = 100;
     cityTitleTimer = 5.0f;
     player.setPosition({ 400.0f, 300.0f});
+}
+
+void Game::initCityLevel() {
+    cityBlocks.push_back({ 200, 200, 300, 400 });
+    cityBlocks.push_back({ 700, 100, 200, 200 });
+    cityBlocks.push_back({ 1200, 600, 400, 300 });
 }
 
 //update
@@ -44,9 +52,38 @@ void Game::update() {
         case GAMEPLAY: {
             const Vector2 oldPos = player.getPosition();
             player.update(GetFrameTime());
+            Vector2 currentPos = player.getPosition();
 
-            if (const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40 }; CheckCollisionRecs(playerRect, treeCollider)) {
-                player.setPosition(oldPos);
+            if (roomX == 0 && currentPos.x > worldSize) {
+                roomX = 1;
+                currentPos.x = 50.0f;
+                player.setPosition(currentPos);
+            }else if (roomX == 1 && currentPos.x < 0) {
+                roomX = 0;
+                currentPos.x = worldSize - 50.0f;
+                player.setPosition(currentPos);
+            }
+            if (roomX == 1) {
+                const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40};
+                for (const auto& block : cityBlocks) {
+                    if (CheckCollisionRecs(playerRect, block)) {
+                        player.setPosition(oldPos);
+                        break;
+                    }
+                }
+            }
+
+            currentPos = player.getPosition();
+            if (currentPos.y < 0) currentPos.y = 0;
+            if (currentPos.y > worldSize) currentPos.y = worldSize;
+            if (roomX == 0 && currentPos.x < 0) currentPos.x = 0;
+            if (roomX == 1 && currentPos.x > worldSize) currentPos.x = worldSize;
+            player.setPosition(currentPos);
+
+            if (roomX == 0) {
+                if (const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40 }; CheckCollisionRecs(playerRect, treeCollider)) {
+                    player.setPosition(oldPos);
+                }
             }
 
             camera.target = player.getPosition();
@@ -85,7 +122,29 @@ void Game::draw() const {
         }
         case GAMEPLAY: {
             BeginMode2D(camera);
-            DrawRectangleRec(treeCollider, GREEN);
+            int tileSize = 64;
+
+            for (int x = 0; x < 32; x++) {
+                for (int y = 0; y < 32; y++) {
+                    if (roomX == 0) {
+                        const Color groundColor = ((x + y) % 2 == 0) ? Color{ 34, 139, 34, 255} : Color{ 50, 205, 50, 255 };
+                        DrawRectangle(x * tileSize, y * tileSize, tileSize, tileSize, groundColor);
+                    } else {
+                        const Color betonColor = ((x + y) % 2 == 0) ? GRAY : DARKGRAY;
+                        DrawRectangle(x * tileSize, y * tileSize, tileSize, tileSize, betonColor);
+                        DrawRectangleLines(x * tileSize, y * tileSize, tileSize, tileSize,LIGHTGRAY);
+                    }
+                }
+            }
+            if (roomX == 0) {
+                DrawRectangleRec(treeCollider, GREEN);
+            }
+            if (roomX == 1) {
+                for (const auto& block : cityBlocks) {
+                    DrawRectangleRec(block, DARKBLUE);
+                    DrawRectangleLinesEx(block, 3, SKYBLUE);
+                }
+            }
             player.draw();
             EndMode2D();
 
