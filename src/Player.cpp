@@ -6,19 +6,17 @@
 
 #include <cmath>
 
-Player::Player(Vector2 startPos, float startSpeed) :
+Player::Player(const Vector2 startPos, const float startSpeed) :
     position(startPos), speed(startSpeed){}
 
-void Player::update(float dt) {
+void Player::update(const float dt) {
     Vector2 direction = { 0.0f, 0.0f };
     if (IsKeyDown(KEY_W)) direction.y -= 1.0f;
     if (IsKeyDown(KEY_S)) direction.y += 1.0f;
     if (IsKeyDown(KEY_A)) direction.x -= 1.0f;
     if (IsKeyDown(KEY_D)) direction.x += 1.0f;
 
-    float length = sqrtf(direction.x * direction.x + direction.y * direction.y);
-
-    if (length > 0.0f) {
+    if (const float length = sqrtf(direction.x * direction.x + direction.y * direction.y); length > 0.0f) {
         direction.x /= length;
         direction.y /= length;
     }
@@ -28,6 +26,6 @@ void Player::update(float dt) {
 
 }
 
-void Player::draw() {
+void Player::draw() const {
     DrawCircleV(position, 20, VIOLET);
 }

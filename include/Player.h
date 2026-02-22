@@ -13,13 +13,13 @@ public:
 
     void update (float dt);
 
-    void draw();
+    void draw() const;
 
-    Vector2 getPosition() const {
+    [[nodiscard]] Vector2 getPosition() const {
         return position;
     }
 
-    void setPosition(Vector2 newPos) {
+    void setPosition(const Vector2 newPos) {
         position = newPos;
     }
 

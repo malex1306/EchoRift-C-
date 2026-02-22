@@ -21,7 +21,8 @@ if(RAYLIB_INCLUDE_DIR)
 endif()
 
 # 5. Das Programm bauen
-add_executable(${PROJECT_NAME} main.cpp ${SOURCES})
+add_executable(${PROJECT_NAME} main.cpp ${SOURCES}
+        include/components/UiComponents.h)
 
 # 6. Verlinken
 if(RAYLIB_LIB)
