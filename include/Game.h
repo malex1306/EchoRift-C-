@@ -23,6 +23,8 @@ private:
 
     void draw(); //graphics
 
+    void resetGame(); // reset
+
     const int screenWidth = 1980;
     const int screenHeight = 1080;
 

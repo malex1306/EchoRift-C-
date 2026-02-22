@@ -23,6 +23,12 @@ void Game::run() {
     }
 }
 
+void Game::resetGame() {
+    health = 100;
+    cityTitleTimer = 5.0f;
+    player.setPosition({ 400.0f, 300.0f});
+}
+
 //update
 void Game::update() {
     switch (currentState) {
@@ -57,11 +63,13 @@ void Game::update() {
             break;
         }
         case GAMEOVER:
-            if (IsKeyPressed(KEY_R)) {
-                health = 100;
-                cityTitleTimer = 5.0f;
-                player.setPosition({ 400.0f, 300.0f});
-                currentState = TITLE;
+            Vector2 mousePos = GetMousePosition();
+            Rectangle resetButton = { screenWidth / 2.0f - 100, screenHeight / 2.0f, 200, 50 };
+            if (CheckCollisionPointRec(mousePos, resetButton)) {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    currentState = GAMEPLAY;
+                    resetGame();
+                }
             }
             break;
     }
@@ -108,8 +116,16 @@ void Game::draw() {
             break;
         }
         case GAMEOVER:
-            DrawText("Game Over", 300, 250, 40, RED);
-            DrawText("Drücke R um den letzeten Speicherpunkt zu laden", 280, 320, 20, GRAY);
+            Rectangle resetButton = { screenWidth / 2.0f - 100, screenHeight / 2.0f, 200, 50 };
+            Vector2 mousePos = GetMousePosition();
+            bool isHovering = CheckCollisionPointRec(mousePos, resetButton);
+            Color btnColor = isHovering ? GRAY : DARKGRAY;
+            DrawRectangleRec(resetButton, btnColor);
+            DrawRectangleLinesEx(resetButton, 2, GOLD);
+            int textWidth = MeasureText("Reset", 20);
+            DrawText("Reset", resetButton.x + (resetButton.width/2 - textWidth/2), resetButton.y + 15, 20, RAYWHITE);
+            DrawText("Game Over", screenWidth/2 - MeasureText("Echo Rift", 40)/2, screenHeight/2 - 100, 40, GOLD);
+            break;
     }
 
     EndDrawing();
