@@ -42,6 +42,7 @@ private:
     Player player;
     Camera2D camera{};
     GameState currentState;
+    Rectangle* activeItem = nullptr;
 };
 
 #endif //ECHORIFT_GAME_H

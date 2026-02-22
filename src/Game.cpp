@@ -15,6 +15,10 @@ Game::Game() : player({ 400.0f, 300.0f}, 300.0f) {
 }
 
 Game::~Game() {
+    if (activeItem != nullptr) {
+        delete activeItem;
+        activeItem = nullptr;
+    }
     CloseWindow();
 }
 
@@ -30,6 +34,11 @@ void Game::resetGame() {
     health = 100;
     cityTitleTimer = 5.0f;
     player.setPosition({ 400.0f, 300.0f});
+
+    if (activeItem != nullptr) {
+        delete activeItem;
+        activeItem = nullptr;
+    }
 }
 
 void Game::initCityLevel() {
@@ -47,55 +56,70 @@ void Game::update() {
             if (const UI::Button startBtn({ screenWidth / 2.0f - 100, screenHeight / 2.0f, 200, 50 }, "START"); startBtn.isClicked() || IsKeyPressed(KEY_ENTER)) {
                 currentState = GAMEPLAY;
             }
-            break;
         }
         case GAMEPLAY: {
-            const Vector2 oldPos = player.getPosition();
-            player.update(GetFrameTime());
-            Vector2 currentPos = player.getPosition();
+    const Vector2 oldPos = player.getPosition();
+    player.update(GetFrameTime());
+    Vector2 currentPos = player.getPosition();
 
-            if (roomX == 0 && currentPos.x > worldSize) {
-                roomX = 1;
-                currentPos.x = 50.0f;
-                player.setPosition(currentPos);
-            }else if (roomX == 1 && currentPos.x < 0) {
-                roomX = 0;
-                currentPos.x = worldSize - 50.0f;
-                player.setPosition(currentPos);
+    //change room logic
+    if (roomX == 0 && currentPos.x > worldSize) {
+        roomX = 1;
+        currentPos.x = 50.0f;
+        player.setPosition(currentPos);
+    } else if (roomX == 1 && currentPos.x < 0) {
+        roomX = 0;
+        currentPos.x = worldSize - 50.0f;
+        player.setPosition(currentPos);
+    }
+
+    if (roomX == 1) {
+        const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40 };
+        for (const auto& block : cityBlocks) {
+            if (CheckCollisionRecs(playerRect, block)) {
+                player.setPosition(oldPos);
+                break;
             }
-            if (roomX == 1) {
-                const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40};
-                for (const auto& block : cityBlocks) {
-                    if (CheckCollisionRecs(playerRect, block)) {
-                        player.setPosition(oldPos);
-                        break;
-                    }
-                }
-            }
-
-            currentPos = player.getPosition();
-            if (currentPos.y < 0) currentPos.y = 0;
-            if (currentPos.y > worldSize) currentPos.y = worldSize;
-            if (roomX == 0 && currentPos.x < 0) currentPos.x = 0;
-            if (roomX == 1 && currentPos.x > worldSize) currentPos.x = worldSize;
-            player.setPosition(currentPos);
-
-            if (roomX == 0) {
-                if (const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40 }; CheckCollisionRecs(playerRect, treeCollider)) {
-                    player.setPosition(oldPos);
-                }
-            }
-
-            camera.target = player.getPosition();
-
-            if (cityTitleTimer > 0) cityTitleTimer -= GetFrameTime();
-
-            if (IsKeyPressed(KEY_MINUS)) {
-                health -= 10;
-                if (health <= 0) { health = 0; currentState = GAMEOVER; }
-            }
-            break;
         }
+    }
+
+    currentPos = player.getPosition();
+    if (currentPos.y < 0) currentPos.y = 0;
+    if (currentPos.y > worldSize) currentPos.y = worldSize;
+    if (roomX == 0 && currentPos.x < 0) currentPos.x = 0;
+    if (roomX == 1 && currentPos.x > worldSize) currentPos.x = worldSize;
+    player.setPosition(currentPos);
+
+    if (roomX == 0) {
+        const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40 };
+        if (CheckCollisionRecs(playerRect, treeCollider)) {
+            player.setPosition(oldPos);
+        }
+    }
+
+    camera.target = player.getPosition();
+    if (cityTitleTimer > 0) cityTitleTimer -= GetFrameTime();
+
+    if (IsKeyPressed(KEY_MINUS)) {
+        health -= 10;
+        if (health <= 0) { health = 0; currentState = GAMEOVER; }
+    }
+
+    if (IsKeyPressed(KEY_I) && activeItem == nullptr) {
+        activeItem = new Rectangle{ 600, 400, 40, 40 };
+    }
+
+    // pointer logic: take item
+    if (activeItem != nullptr) {
+        const Rectangle playerRect = { player.getPosition().x - 20, player.getPosition().y - 20, 40, 40 };
+        if (CheckCollisionRecs(playerRect, *activeItem)) {
+            delete activeItem;
+            activeItem = nullptr;
+            health = 100;
+        }
+    }
+    break;
+}
         case GAMEOVER: {
             if (const UI::Button resetBtn({ screenWidth / 2.0f - 100, screenHeight / 2.0f, 200, 50 }, "RESET"); resetBtn.isClicked() || IsKeyPressed(KEY_R)) {
                 resetGame();
@@ -144,6 +168,9 @@ void Game::draw() const {
                     DrawRectangleRec(block, DARKBLUE);
                     DrawRectangleLinesEx(block, 3, SKYBLUE);
                 }
+            }
+            if (activeItem != nullptr) {
+                DrawRectangleRec(*activeItem, GOLD);
             }
             player.draw();
             EndMode2D();
