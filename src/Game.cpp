@@ -251,7 +251,7 @@ void Game::draw() const {
             break;
         }
         case GAMEOVER: {
-            UI::Label goLabel = { "GAME OVER", 40, RED };
+            UI::Label goLabel = { "GAME OVER!", 40, RED };
             goLabel.draw(screenWidth, screenHeight / 2 - 100);
             UI::Button resetBtn({ screenWidth / 2.0f - 100, screenHeight / 2.0f, 200, 50 }, "RESET");
             resetBtn.draw();
